@@ -1,1 +1,2 @@
-# odin-etch-a-sketch
+# Etch A Sketch
+it's etch a sketch! Hope you like my DOM manipulation skills B-)
