@@ -1,0 +1,63 @@
+
+/*
+#header, #container, #settings, #footer {
+	outline: 2px solid red;
+}
+*/
+
+/*header*/
+#header { 
+	display: flex;
+	flex-direction: column; 
+	align-items: center;
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+/*container*/
+#container {
+	outline: 2px solid black;
+	height: 790px;
+	width: 900px;
+	display: flex;
+	flex-direction: column;
+	margin: 0 auto;
+}
+
+.cellsY {
+	outline: 1px solid black;
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+}
+
+.cellsX {
+	outline: 1px solid black;
+	width: 100%;
+	height: 100%;
+}
+
+/*settings*/
+#settings {
+	display: flex;
+	justify-content: center;
+	padding: 10px;
+	gap: 10px;
+}
+
+#settings button {
+	font-size: 16px;
+	width: 200px;
+}
+
+/*footer*/
+#footer {
+	display: flex;
+	justify-content: center;
+}
+
+/*optional class styles*/
+.highlight {
+	background-color: darkgray;
+}
