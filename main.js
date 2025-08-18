@@ -3,6 +3,22 @@
 //settings
 const emptyCellColor = "white";
 const takenCellColor = "black";
+let currentMode = "classic";
+
+//settings
+function setMode(mode) {
+	switch(mode) {
+		case "classic": 
+			playGrid();
+			break;
+		case "rgb mode":
+			playRgbGrid();
+			break;
+		case "darkening mode":
+			playDarkeningGrid();
+			break;
+	}
+}
 
 //get the grid size
 const confirmGridBtn = document.querySelector("#bsize");
@@ -19,13 +35,15 @@ confirmGridBtn.addEventListener("click", () => {
 	else {
 		warning.textContent = `Grid Size: ${size}`;
 		setGridSize(size);
-		playGrid();
+		setMode(currentMode);
 	}
 
 	fsize.value = "";
 });
 
 //set up grid
+const container = document.getElementById("container");
+
 function clearGrid(parent) {
 	parent.innerHTML = "";
 }
@@ -45,8 +63,6 @@ function clearGridDrawing(parent) {
 }
 
 function setGridSize(size) {
-	const container = document.querySelector("#container");
-
 	clearGrid(container);
 
 	for(let i = 0; i < size; i++) {
@@ -63,34 +79,28 @@ function setGridSize(size) {
 	}
 }
 
-//event listeners for grid
-function playGrid() {
-	console.log("playing classic grid...");
-	const container = document.getElementById("container");
-	const cellsY = container.children;
+function forEachCell(parent, callback) {
+	row = [...parent.childNodes];
+	
+	row.forEach(colEntry => {
+		col = [...colEntry.childNodes];
 
-	clearGridDrawing(container);
-
-	//UNO////////////////////////////////////////////
-	[...cellsY].forEach(cellsX => {
-		[...cellsX.childNodes].forEach(cell => {
-			cell.addEventListener("mouseover", () => {
-				cell.style.backgroundColor = takenCellColor;
-			})
-		})
+		col.forEach(cell => {
+			callback(cell);
+		});
 	});
+}
 
-	//DOS/////////////////////////////////////////////
-	/*
-	for(let i = 0; i < cellsY.length; i++) {
-		const cellsX = cellsY[i].childNodes;
-		for(let j = 0; j < cellsX.length; j++) {
-			cellsX[j].addEventListener("mouseover", () => {
-				cellsX[j].style.backgroundColor = "black";	
-			});
-		}
-	}
-	*/
+//event listeners for grid
+
+
+function playGrid() {
+	clearGridDrawing(container);
+	forEachCell(container, cell => {
+		cell.addEventListener("mouseover", () => {
+			cell.style.backgroundColor = takenCellColor;
+		});
+	});
 }
 
 function getRandomRgbColor() {
@@ -102,29 +112,66 @@ function getRandomRgbColor() {
 }
 
 function playRgbGrid() {
-	console.log("playing rgb grid...");
-	const container = document.getElementById("container");
-	const cellsY = container.children;
-
 	clearGridDrawing(container);
 
-	[...cellsY].forEach(cellsX => {
-		[...cellsX.childNodes].forEach(cell => {
-			cell.addEventListener("mouseover", () => {
-				cell.style.backgroundColor = getRandomRgbColor();
-			});
+	forEachCell(container, (cell) => {
+		cell.addEventListener("mouseover", () => {
+			cell.style.backgroundColor = getRandomRgbColor();
 		});
-	});
+	})
 }
 
 function playDarkeningGrid() {
-	console.log("playing darkening grid...");
+	clearGridDrawing(container);
+
+	const seenCells = [];
+	let darkeningFunction;
+	let cellReference;
+
+	darkeningFunction = () => {
+		cellReference.style.backgroundColor = takenCellColor;
+		let opacity = parseFloat(cellReference.style.opacity);
+
+		if(isNaN(opacity)) {
+			opacity = 0.1;
+			
+			cellReference.style.opacity = opacity;
+				
+			if(seenCells.length == 10) { seenCells.shift(); }
+			seenCells.push(cellReference);
+		}
+
+		for(let someCell of seenCells){
+			let opacity = parseFloat(someCell.style.opacity);
+			someCell.style.opacity = (opacity + 0.1);
+		}
+	}
+
+	function addMyListener() {
+		forEachCell(container, cell => {
+			cell.addEventListener("mouseover", () => cellReference = cell);
+
+			cell.addEventListener("mouseover", darkeningFunction);
+		});
+	}
+
+	function removeListener() {
+		forEachCell(container, cell => {
+			cell.removeEventListener("mouseover", darkeningFunction);
+		})
+	}
+
+	addMyListener();
+
+	settingsBtn.forEach((btn, index) => {
+		btn.addEventListener("click", removeListener);
+		seenCells.length = 0;
+	})
 }
 
 //settings
 //gets the reference to all settings children and spreads it into an array
 const settingsBtn = [...document.getElementById("settings").children];
-
 
 settingsBtn.forEach((btn, index) => {
 	console.log(btn.textContent);
@@ -134,17 +181,9 @@ settingsBtn.forEach((btn, index) => {
 		})
 		btn.classList.add("highlight");
 
-		switch(btn.textContent) {
-			case "rgb mode": 
-				playRgbGrid();
-				break;
-			case "classic":
-				playGrid();
-				break;
-			case "darkening mode":
-				playDarkeningGrid();
-				break;
-		}
+		let removeListener;
+		currentMode = btn.textContent
+		setMode(currentMode);
 	})
 });
 
